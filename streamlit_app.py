@@ -20,11 +20,13 @@ web_dir = project_root / "web"
 sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(web_dir))
 
-# 切换到 web 目录，确保相对导入正确
-os.chdir(web_dir)
+# 切换到项目根目录
+os.chdir(project_root)
 
-# 导入并运行主应用（直接导入，不使用 runpy）
-# 这样 Streamlit 可以正确处理
-import runpy
-runpy.run_path(str(web_dir / "app.py"), run_name="__main__")
-
+# 直接导入 web.app 模块，让 Streamlit 执行它
+# 这种方式与 Streamlit Cloud 兼容
+import importlib.util
+spec = importlib.util.spec_from_file_location("app", web_dir / "app.py")
+app_module = importlib.util.module_from_spec(spec)
+sys.modules["app"] = app_module
+spec.loader.exec_module(app_module)
