@@ -1083,11 +1083,25 @@ def render_sidebar():
         # 系统信息
         st.markdown("**ℹ️ 系统信息**")
         
+        # 动态检测已配置的数据源
+        data_sources = []
+        data_sources.append("AKShare")  # AKShare 默认可用
+        
+        tushare_token = get_api_key("TUSHARE_TOKEN", "data_sources")
+        if tushare_token and tushare_token not in ["your-tushare-token", ""]:
+            data_sources.append("Tushare")
+        
+        finnhub_key = get_api_key("FINNHUB_API_KEY", "data_sources")
+        if finnhub_key and finnhub_key not in ["your-finnhub-api-key", ""]:
+            data_sources.append("FinnHub")
+        
+        data_source_display = " + ".join(data_sources) if data_sources else "AKShare"
+        
         st.info(f"""
         **版本**: {get_version()}
         **框架**: Streamlit + LangGraph
         **AI模型**: {st.session_state.llm_provider.upper()} - {st.session_state.llm_model}
-        **数据源**: Tushare + FinnHub API
+        **数据源**: {data_source_display}
         """)
         
         # 管理员功能
