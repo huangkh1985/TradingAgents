@@ -29,34 +29,45 @@ class AuthManager:
     def __init__(self):
         self.users_file = Path(__file__).parent.parent / "config" / "users.json"
         self.session_timeout = 600  # 10分钟超时
+        self.users_data = None  # 用于存储用户数据
         self._ensure_users_file()
     
     def _ensure_users_file(self):
-        """确保用户配置文件存在"""
-        self.users_file.parent.mkdir(exist_ok=True)
-        
-        if not self.users_file.exists():
-            # 创建默认用户配置
-            default_users = {
-                "admin": {
-                    "password_hash": self._hash_password("admin123"),
-                    "role": "admin",
-                    "permissions": ["analysis", "config", "admin"],
-                    "created_at": time.time()
-                },
-                "user": {
-                    "password_hash": self._hash_password("user123"),
-                    "role": "user", 
-                    "permissions": ["analysis"],
-                    "created_at": time.time()
-                }
+        """确保用户配置文件存在或从内存加载"""
+        # 默认用户配置
+        default_users = {
+            "admin": {
+                "password_hash": self._hash_password("admin123"),
+                "role": "admin",
+                "permissions": ["analysis", "config", "admin"],
+                "created_at": time.time()
+            },
+            "user": {
+                "password_hash": self._hash_password("user123"),
+                "role": "user", 
+                "permissions": ["analysis"],
+                "created_at": time.time()
             }
+        }
+        
+        try:
+            # 尝试创建目录和文件（本地环境）
+            self.users_file.parent.mkdir(exist_ok=True)
             
-            with open(self.users_file, 'w', encoding='utf-8') as f:
-                json.dump(default_users, f, indent=2, ensure_ascii=False)
+            if not self.users_file.exists():
+                with open(self.users_file, 'w', encoding='utf-8') as f:
+                    json.dump(default_users, f, indent=2, ensure_ascii=False)
+                logger.info(f"✅ 用户认证系统初始化完成")
+                logger.info(f"📁 用户配置文件: {self.users_file}")
             
-            logger.info(f"✅ 用户认证系统初始化完成")
-            logger.info(f"📁 用户配置文件: {self.users_file}")
+            # 从文件加载用户数据
+            with open(self.users_file, 'r', encoding='utf-8') as f:
+                self.users_data = json.load(f)
+        except (PermissionError, OSError) as e:
+            # Streamlit Cloud 或只读环境：使用内存中的默认用户
+            logger.warning(f"⚠️ 无法创建用户配置文件（可能在只读环境）: {e}")
+            logger.info("📦 使用内存中的默认用户配置")
+            self.users_data = default_users
     
     def _inject_auth_cache_js(self):
         """注入前端认证缓存JavaScript代码"""
@@ -154,9 +165,13 @@ class AuthManager:
     
     def _load_users(self) -> Dict:
         """加载用户配置"""
+        if self.users_data is not None:
+            return self.users_data
+        
         try:
             with open(self.users_file, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                self.users_data = json.load(f)
+                return self.users_data
         except Exception as e:
             logger.error(f"❌ 加载用户配置失败: {e}")
             return {}
