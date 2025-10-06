@@ -45,7 +45,7 @@ class ModelPersistence:
             query_params = st.query_params
             if 'provider' in query_params:
                 config = {
-                    'provider': query_params.get('provider', 'dashscope'),
+                    'provider': query_params.get('provider', 'openai'),
                     'category': query_params.get('category', 'openai'),
                     'model': query_params.get('model', '')
                 }
@@ -60,9 +60,9 @@ class ModelPersistence:
             logger.debug(f"📥 [Persistence] 从Session State加载配置: {config}")
             return config
         
-        # 返回默认配置
+        # 返回默认配置（OpenAI + AKShare）
         default_config = {
-            'provider': 'dashscope',
+            'provider': 'openai',
             'category': 'openai',
             'model': ''
         }
