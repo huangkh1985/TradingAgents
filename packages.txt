@@ -1,0 +1,24 @@
+# 系统级依赖包（适用于 Streamlit Cloud 部署）
+# 
+# 这个文件列出需要通过 apt-get 安装的系统级依赖
+# Streamlit Cloud 会在部署时自动安装这些包
+# 
+# 注意：大多数 Python 包应该在 requirements.txt 或 pyproject.toml 中定义
+# 只有系统级的二进制依赖才需要在这里列出
+
+# 如果需要处理 PDF 文档（pypandoc）
+# pandoc
+
+# 如果需要生成 PDF 报告
+# wkhtmltopdf
+
+# 如果需要图像处理库
+# libgl1-mesa-glx
+# libglib2.0-0
+
+# 如果需要数据库客户端
+# postgresql-client
+# mysql-client
+
+# 注意：默认情况下这些依赖可能不需要，按需取消注释
+

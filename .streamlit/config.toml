@@ -1,0 +1,40 @@
+[server]
+# 服务器配置
+port = 8501
+address = "localhost"  # 本地开发使用 localhost
+headless = false       # 本地开发使用浏览器模式
+# 本地开发时禁用 CSRF 保护，云部署时 Streamlit Cloud 会自动启用
+enableCORS = false
+enableXsrfProtection = false
+
+# 文件监控配置
+# 本地开发时可以设置为 "auto"，云部署时建议 "none"
+fileWatcherType = "auto"
+runOnSave = true
+
+[browser]
+# 浏览器配置
+gatherUsageStats = false
+serverAddress = "localhost"
+serverPort = 8501
+
+[logger]
+# 日志配置
+level = "info"
+
+[global]
+# 全局配置
+developmentMode = false
+
+[client]
+# 客户端配置
+showErrorDetails = false  # 生产环境隐藏错误详情
+toolbarMode = "minimal"   # 精简工具栏
+
+[theme]
+# 主题配置
+base = "light"
+primaryColor = "#1f77b4"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f0f2f6"
+textColor = "#262730"
