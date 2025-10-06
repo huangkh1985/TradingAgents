@@ -67,8 +67,25 @@ class TradingAgentsGraph:
 
         # Initialize LLMs
         if self.config["llm_provider"].lower() == "openai":
-            self.deep_thinking_llm = ChatOpenAI(model=self.config["deep_think_llm"], base_url=self.config["backend_url"])
-            self.quick_thinking_llm = ChatOpenAI(model=self.config["quick_think_llm"], base_url=self.config["backend_url"])
+            # 支持从 Streamlit Secrets 读取 OPENAI_API_BASE
+            try:
+                from tradingagents.utils.secrets_helper import get_openai_api_key, get_openai_api_base
+                openai_api_key = get_openai_api_key() or os.getenv("OPENAI_API_KEY")
+                openai_api_base = get_openai_api_base() or self.config["backend_url"]
+            except ImportError:
+                openai_api_key = os.getenv("OPENAI_API_KEY")
+                openai_api_base = self.config["backend_url"]
+            
+            self.deep_thinking_llm = ChatOpenAI(
+                model=self.config["deep_think_llm"], 
+                base_url=openai_api_base,
+                api_key=openai_api_key
+            )
+            self.quick_thinking_llm = ChatOpenAI(
+                model=self.config["quick_think_llm"], 
+                base_url=openai_api_base,
+                api_key=openai_api_key
+            )
         elif self.config["llm_provider"] == "siliconflow":
             # SiliconFlow支持：使用OpenAI兼容API
             siliconflow_api_key = os.getenv('SILICONFLOW_API_KEY')
