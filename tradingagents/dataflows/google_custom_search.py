@@ -120,10 +120,13 @@ class GoogleCustomSearchNews:
                 if 'error' in data:
                     error_msg = data['error'].get('message', '未知错误')
                     logger.error(f"[Google Custom Search] API错误: {error_msg}")
+                # 🔍 记录完整的API响应以便调试
+                logger.debug(f"[Google Custom Search] 完整API响应: {data}")
                 return []
             
             items = data['items']
             logger.info(f"[Google Custom Search] 获取到 {len(items)} 条结果，耗时 {elapsed:.2f} 秒")
+            logger.info(f"[Google Custom Search] 📋 结果预览: {[item.get('title', 'N/A')[:50] for item in items[:3]]}")
             
             # 解析搜索结果
             news_list = []
@@ -235,7 +238,13 @@ def get_google_custom_search_news(
     header += f"**新闻数量**: {len(news_list)} 条\n\n"
     header += "---\n\n"
     
-    return header + news_str
+    final_result = header + news_str
+    
+    # 🔍 记录返回结果的长度和内容预览
+    logger.info(f"[Google Custom Search] 📊 格式化完成，总长度: {len(final_result)} 字符")
+    logger.info(f"[Google Custom Search] 📋 格式化内容预览 (前300字符): {final_result[:300]}")
+    
+    return final_result
 
 
 # 测试函数

@@ -122,13 +122,24 @@ class UnifiedNewsAnalyzer:
             logger.info(f"[统一新闻工具] 尝试Google Custom Search API...")
             query = f"{stock_code} 股票 新闻 财报 业绩"
             result = get_google_custom_search_news(query, curr_date, look_back_days=7)
-            if result and len(result.strip()) > 100:
+            
+            # 🔍 添加详细的调试日志
+            logger.info(f"[统一新闻工具] 📊 Google Custom Search API 返回结果长度: {len(result) if result else 0} 字符")
+            if result:
+                logger.info(f"[统一新闻工具] 📋 返回内容预览 (前300字符): {result[:300]}")
+            
+            # 🔧 修复：降低长度阈值，避免有效数据被过滤
+            if result and len(result.strip()) > 50:  # 从 100 降低到 50
                 logger.info(f"[统一新闻工具] ✅ Google Custom Search API获取成功: {len(result)} 字符")
                 return self._format_news_result(result, "Google Custom Search API", model_info)
+            elif result:
+                logger.warning(f"[统一新闻工具] ⚠️ Google Custom Search API返回内容过短: {len(result)} 字符，内容: {result}")
             else:
-                logger.debug(f"[统一新闻工具] Google Custom Search API未返回数据（可能未配置）")
+                logger.warning(f"[统一新闻工具] ⚠️ Google Custom Search API返回空内容")
         except Exception as e:
             logger.warning(f"[统一新闻工具] Google Custom Search API失败: {e}")
+            import traceback
+            logger.debug(f"[统一新闻工具] 详细错误: {traceback.format_exc()}")
         
         # 优先级3: Google新闻（网页爬虫，备用方案）
         try:
@@ -170,13 +181,24 @@ class UnifiedNewsAnalyzer:
             logger.info(f"[统一新闻工具] 尝试Google Custom Search API（港股）...")
             query = f"{stock_code} 港股 香港股票 新闻 财报"
             result = get_google_custom_search_news(query, curr_date, look_back_days=7)
-            if result and len(result.strip()) > 100:
+            
+            # 🔍 添加详细的调试日志
+            logger.info(f"[统一新闻工具] 📊 Google Custom Search API (港股) 返回结果长度: {len(result) if result else 0} 字符")
+            if result:
+                logger.info(f"[统一新闻工具] 📋 返回内容预览 (前300字符): {result[:300]}")
+            
+            # 🔧 修复：降低长度阈值，避免有效数据被过滤
+            if result and len(result.strip()) > 50:  # 从 100 降低到 50
                 logger.info(f"[统一新闻工具] ✅ Google Custom Search API（港股）获取成功: {len(result)} 字符")
                 return self._format_news_result(result, "Google Custom Search API（港股）", model_info)
+            elif result:
+                logger.warning(f"[统一新闻工具] ⚠️ Google Custom Search API(港股)返回内容过短: {len(result)} 字符")
             else:
-                logger.debug(f"[统一新闻工具] Google Custom Search API未返回数据（可能未配置）")
+                logger.warning(f"[统一新闻工具] ⚠️ Google Custom Search API(港股)返回空内容")
         except Exception as e:
             logger.warning(f"[统一新闻工具] Google Custom Search API（港股）失败: {e}")
+            import traceback
+            logger.debug(f"[统一新闻工具] 详细错误: {traceback.format_exc()}")
         
         # 优先级2: Google新闻（网页爬虫，港股搜索）
         try:
@@ -230,13 +252,24 @@ class UnifiedNewsAnalyzer:
             logger.info(f"[统一新闻工具] 尝试Google Custom Search API（美股）...")
             query = f"{stock_code} stock news earnings financial report"
             result = get_google_custom_search_news(query, curr_date, look_back_days=7)
-            if result and len(result.strip()) > 100:
+            
+            # 🔍 添加详细的调试日志
+            logger.info(f"[统一新闻工具] 📊 Google Custom Search API (美股) 返回结果长度: {len(result) if result else 0} 字符")
+            if result:
+                logger.info(f"[统一新闻工具] 📋 返回内容预览 (前300字符): {result[:300]}")
+            
+            # 🔧 修复：降低长度阈值，避免有效数据被过滤
+            if result and len(result.strip()) > 50:  # 从 100 降低到 50
                 logger.info(f"[统一新闻工具] ✅ Google Custom Search API（美股）获取成功: {len(result)} 字符")
                 return self._format_news_result(result, "Google Custom Search API（美股）", model_info)
+            elif result:
+                logger.warning(f"[统一新闻工具] ⚠️ Google Custom Search API(美股)返回内容过短: {len(result)} 字符")
             else:
-                logger.debug(f"[统一新闻工具] Google Custom Search API未返回数据（可能未配置）")
+                logger.warning(f"[统一新闻工具] ⚠️ Google Custom Search API(美股)返回空内容")
         except Exception as e:
             logger.warning(f"[统一新闻工具] Google Custom Search API（美股）失败: {e}")
+            import traceback
+            logger.debug(f"[统一新闻工具] 详细错误: {traceback.format_exc()}")
         
         # 优先级2: OpenAI全球新闻
         try:
