@@ -1,85 +1,176 @@
 #!/usr/bin/env python3
 """
-Streamlit Cloud 部署入口文件 - 极简测试版本
-逐步排查问题
+Streamlit Cloud 部署入口文件
+TradingAgents-CN 股票分析平台
 """
 
 import streamlit as st
 import sys
+import os
 from pathlib import Path
 
-# 设置页面配置
+# 设置页面配置 - 必须在最开始
 st.set_page_config(
-    page_title="TradingAgents-CN 测试",
+    page_title="TradingAgents-CN 股票分析平台",
     page_icon="📈",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded",
+    menu_items=None
 )
 
-# 显示欢迎信息
-st.title("🎉 TradingAgents-CN 应用")
-st.success("✅ 应用已成功启动！")
+# 添加项目根目录和 web 目录到 Python 路径
+project_root = Path(__file__).parent.absolute()
+web_dir = project_root / "web"
+sys.path.insert(0, str(project_root))
+sys.path.insert(0, str(web_dir))
 
-st.markdown("---")
+def check_environment():
+    """检查运行环境并显示状态"""
+    env_info = {
+        "Python版本": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
+        "Streamlit": st.__version__,
+        "项目路径": str(project_root),
+        "是否云端": bool(os.getenv('STREAMLIT_CLOUD', False))
+    }
+    return env_info
 
-# 显示基本信息
-st.header("📊 系统信息")
-col1, col2, col3 = st.columns(3)
+def load_environment():
+    """加载环境变量"""
+    try:
+        from dotenv import load_dotenv
+        env_file = project_root / ".env"
+        if env_file.exists():
+            load_dotenv(env_file, override=True)
+            return True
+        else:
+            # 云端环境使用 secrets
+            return False
+    except ImportError:
+        return False
 
-with col1:
-    st.metric("Python 版本", f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
+def setup_secrets():
+    """设置环境变量从 Streamlit secrets"""
+    try:
+        # 检查是否有 secrets 配置
+        if hasattr(st, 'secrets') and st.secrets:
+            # 从 secrets 设置环境变量
+            for section in st.secrets:
+                if isinstance(st.secrets[section], dict):
+                    for key, value in st.secrets[section].items():
+                        os.environ[key] = str(value)
+            return True
+        return False
+    except Exception as e:
+        st.warning(f"读取 secrets 配置时出错: {e}")
+        return False
 
-with col2:
-    st.metric("Streamlit", st.__version__)
-
-with col3:
-    project_root = Path(__file__).parent.absolute()
-    st.metric("项目根目录", "已找到")
-
-st.markdown("---")
-
-# 测试状态
-st.header("🔍 部署测试")
-
-with st.expander("✅ 第一步：基础启动测试", expanded=True):
-    st.success("应用成功启动并显示此页面")
-    st.info("说明：Streamlit Cloud 环境配置正确")
-
-with st.expander("📝 下一步测试计划"):
-    st.markdown("""
-    **逐步测试项目：**
+def check_dependencies():
+    """检查必要的依赖"""
+    missing_deps = []
+    required_modules = [
+        'tradingagents',
+        'langchain',
+        'openai',
+        'pandas'
+    ]
     
-    1. ✅ 基础 Streamlit 应用（当前）
-    2. ⏳ 添加项目路径和导入测试
-    3. ⏳ 测试日志系统
-    4. ⏳ 测试认证系统
-    5. ⏳ 测试完整 Web 应用
+    for module in required_modules:
+        try:
+            __import__(module)
+        except ImportError:
+            missing_deps.append(module)
     
-    **如果看到此页面，说明：**
-    - Streamlit Cloud 部署成功
-    - Python 环境正常
-    - 包依赖安装正确
+    return missing_deps
+
+def show_error_page(error_msg, details=None):
+    """显示错误页面"""
+    st.error(f"❌ {error_msg}")
+    
+    if details:
+        with st.expander("🔍 详细信息"):
+            st.code(details)
+    
+    st.markdown("---")
+    st.info("""
+    ### 📝 故障排除建议：
+    
+    1. **检查依赖安装**: 确保所有必要的 Python 包已安装
+    2. **检查 API 密钥**: 在 Streamlit Cloud Secrets 中配置 API 密钥
+    3. **查看日志**: 检查应用日志获取更多错误信息
+    4. **联系支持**: 如果问题持续，请查看项目文档
     """)
 
-st.markdown("---")
+def main():
+    """主入口函数"""
+    
+    # 1. 加载环境变量
+    has_env = load_environment()
+    has_secrets = setup_secrets()
+    
+    # 显示环境状态（仅调试模式）
+    if os.getenv('DEBUG_MODE') == 'true':
+        env_info = check_environment()
+        with st.expander("🔧 环境信息（调试模式）"):
+            st.json(env_info)
+            st.write(f"环境变量加载: {'✅' if has_env else '❌'}")
+            st.write(f"Secrets 加载: {'✅' if has_secrets else '❌'}")
+    
+    # 2. 检查依赖
+    missing_deps = check_dependencies()
+    if missing_deps:
+        show_error_page(
+            "缺少必要的依赖包",
+            f"缺少的包: {', '.join(missing_deps)}\n\n请运行: pip install {' '.join(missing_deps)}"
+        )
+        return
+    
+    # 3. 尝试导入并运行完整应用
+    try:
+        # 导入 web 应用的主函数
+        from web.app import main as web_main, initialize_session_state, check_frontend_auth_cache
+        
+        # 运行完整应用
+        web_main()
+        
+    except ImportError as e:
+        # 如果导入失败，显示详细错误和降级方案
+        error_details = f"导入错误: {str(e)}\n\nPython路径:\n" + "\n".join(sys.path)
+        
+        show_error_page("无法加载应用模块", error_details)
+        
+        # 显示基础功能降级方案
+        st.markdown("---")
+        st.warning("⚠️ 使用降级模式运行基础功能")
+        
+        st.header("📊 TradingAgents-CN 股票分析平台")
+        st.info("""
+        **完整功能暂时不可用，但您可以：**
+        
+        1. 检查 API 配置
+        2. 查看系统状态
+        3. 等待系统恢复
+        
+        **如需完整功能，请确保：**
+        - 所有依赖包已正确安装
+        - 项目文件结构完整
+        - API 密钥已配置
+        """)
+        
+        # 显示系统信息
+        with st.expander("🔍 系统信息"):
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Python 版本", f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
+                st.metric("Streamlit 版本", st.__version__)
+            with col2:
+                st.metric("项目路径", "已找到" if project_root.exists() else "未找到")
+                st.metric("Web 目录", "存在" if web_dir.exists() else "不存在")
+        
+    except Exception as e:
+        # 捕获其他运行时错误
+        import traceback
+        error_details = f"运行时错误:\n{str(e)}\n\n堆栈跟踪:\n{traceback.format_exc()}"
+        show_error_page("应用运行错误", error_details)
 
-# 登录测试区域
-st.header("🔐 快速登录测试")
-
-st.info("""
-**默认测试账号：**
-- 管理员：`admin` / `admin123`
-- 普通用户：`user` / `user123`
-
-等待完整功能恢复后可用。
-""")
-
-# 显示调试信息
-with st.expander("🛠️ 调试信息"):
-    st.code(f"""
-项目根目录: {Path(__file__).parent.absolute()}
-工作目录: {Path.cwd()}
-Python 路径: {sys.path[:3]}
-    """)
-
-st.markdown("---")
-st.caption("TradingAgents-CN v1.0 | 部署测试版本")
+if __name__ == "__main__":
+    main()
