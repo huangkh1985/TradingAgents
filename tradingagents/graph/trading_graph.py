@@ -185,10 +185,18 @@ class TradingAgentsGraph:
             # DeepSeek V3配置 - 使用支持token统计的适配器
             from tradingagents.llm_adapters.deepseek_adapter import ChatDeepSeek
 
+            # 支持从 Streamlit Secrets 读取 DEEPSEEK_API_KEY
+            try:
+                from tradingagents.utils.secrets_helper import get_deepseek_api_key
+                deepseek_api_key = get_deepseek_api_key() or os.getenv('DEEPSEEK_API_KEY')
+            except ImportError:
+                deepseek_api_key = os.getenv('DEEPSEEK_API_KEY')
 
-            deepseek_api_key = os.getenv('DEEPSEEK_API_KEY')
             if not deepseek_api_key:
-                raise ValueError("使用DeepSeek需要设置DEEPSEEK_API_KEY环境变量")
+                raise ValueError(
+                    "DEEPSEEK_API_KEY 环境变量未设置。\n"
+                    "请在 Streamlit Cloud 的 Secrets 中配置，或在 .env 文件中设置。"
+                )
 
             deepseek_base_url = os.getenv('DEEPSEEK_BASE_URL', 'https://api.deepseek.com')
 
@@ -206,7 +214,7 @@ class TradingAgentsGraph:
                 base_url=deepseek_base_url,
                 temperature=0.1,
                 max_tokens=2000
-                )
+            )
 
             logger.info(f"✅ [DeepSeek] 已启用token统计功能")
         elif self.config["llm_provider"].lower() == "custom_openai":
