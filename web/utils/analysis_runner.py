@@ -734,10 +734,24 @@ def format_analysis_results(results):
         if key in state:
             # 对文本内容进行中文化处理
             content = state[key]
+            
+            # 🔍 添加调试日志：追踪新闻数据
+            if key == 'news_report':
+                logger.info(f"[格式化结果] 📰 news_report 存在于 state 中")
+                logger.info(f"[格式化结果] 类型: {type(content).__name__}, 长度: {len(str(content)) if content else 0}")
+                if isinstance(content, str):
+                    logger.info(f"[格式化结果] 内容预览 (前200字符): {content[:200]}")
+            
             if isinstance(content, str):
                 content = translate_analyst_labels(content)
             formatted_state[key] = content
-        elif key == 'risk_assessment':
+        else:
+            # 🔍 记录缺失的键
+            if key == 'news_report':
+                logger.warning(f"[格式化结果] ⚠️ news_report 不存在于 state 中！")
+                logger.warning(f"[格式化结果] state 中的键: {list(state.keys())}")
+        
+        if key == 'risk_assessment' and key not in state:
             # 特殊处理：从 risk_debate_state 生成 risk_assessment
             risk_assessment = extract_risk_assessment(state)
             if risk_assessment:

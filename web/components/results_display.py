@@ -278,6 +278,16 @@ def render_decision_summary(decision, stock_symbol=None):
 def render_detailed_analysis(state):
     """渲染详细分析报告"""
 
+    # 🔍 添加调试日志：检查传入的 state
+    logger.info(f"[显示调试] render_detailed_analysis 收到的 state 键: {list(state.keys())}")
+    if 'news_report' in state:
+        news_value = state['news_report']
+        logger.info(f"[显示调试] news_report 存在: 类型={type(news_value).__name__}, 长度={len(str(news_value)) if news_value else 0}")
+        if isinstance(news_value, str) and news_value:
+            logger.info(f"[显示调试] news_report 内容预览 (前100字符): {news_value[:100]}")
+    else:
+        logger.warning(f"[显示调试] ⚠️ news_report 不在 state 中")
+
     st.subheader("📋 详细分析报告")
 
     # 添加自定义CSS样式美化标签页
@@ -441,8 +451,8 @@ def render_detailed_analysis(state):
             else:
                 # 对于字符串或其他类型，始终添加（即使为空也显示，以便给出提示）
                 available_modules.append(module)
-                # 如果内容为空，添加友好提示
-                if not value or (isinstance(value, str) and len(value.strip()) == 0):
+                # 🔧 修复：只在真正为空时才替换，避免覆盖有效数据
+                if value is None or (isinstance(value, str) and len(value.strip()) == 0):
                     state[module['key']] = f"""
 ⚠️ **{module['title']}** 数据暂时无法获取
 
@@ -456,6 +466,8 @@ def render_detailed_analysis(state):
 2. 稍后重试分析
 3. 查看日志了解详细错误信息
 """
+                # 添加调试日志
+                logger.debug(f"[显示调试] {module['key']}: {'为空，显示提示' if (value is None or (isinstance(value, str) and len(value.strip()) == 0)) else f'有数据，长度={len(str(value))}'}")
 
     if not available_modules:
         # 显示占位符而不是演示数据
