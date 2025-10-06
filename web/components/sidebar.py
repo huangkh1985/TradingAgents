@@ -436,8 +436,13 @@ def render_sidebar():
         elif llm_provider == "openai":
              openai_options = [
                  "gpt-4o",
+                 "gpt-4o-2024-11-20",
+                 "gpt-4o-2024-08-06",
                  "gpt-4o-mini",
+                 "o1-preview",
+                 "o1-mini",
                  "gpt-4-turbo",
+                 "gpt-4-turbo-2024-04-09",
                  "gpt-4",
                  "gpt-3.5-turbo"
              ]
@@ -452,9 +457,14 @@ def render_sidebar():
                  options=openai_options,
                  index=current_index,
                  format_func=lambda x: {
-                     "gpt-4o": "GPT-4o - 最新旗舰模型",
-                     "gpt-4o-mini": "GPT-4o Mini - 轻量旗舰",
+                     "gpt-4o": "GPT-4o - 🚀 最新旗舰模型（推荐）",
+                     "gpt-4o-2024-11-20": "GPT-4o (2024-11-20) - 最新版本",
+                     "gpt-4o-2024-08-06": "GPT-4o (2024-08-06) - 稳定版",
+                     "gpt-4o-mini": "GPT-4o Mini - ⚡ 轻量高效（推荐）",
+                     "o1-preview": "o1-preview - 🧠 推理模型（复杂任务）",
+                     "o1-mini": "o1-mini - 💡 轻量推理模型",
                      "gpt-4-turbo": "GPT-4 Turbo - 强化版",
+                     "gpt-4-turbo-2024-04-09": "GPT-4 Turbo (2024-04-09) - 稳定版",
                      "gpt-4": "GPT-4 - 经典版",
                      "gpt-3.5-turbo": "GPT-3.5 Turbo - 经济版"
                  }[x],
@@ -473,6 +483,13 @@ def render_sidebar():
                      save_model_selection(st.session_state.llm_provider, st.session_state.model_category, model_id)
                      logger.debug(f"💾 [Persistence] 快速选择GPT-4o: {model_id}")
                      st.rerun()
+                 
+                 if st.button("🧠 o1-preview", key="quick_o1_preview", use_container_width=True):
+                     model_id = "o1-preview"
+                     st.session_state.llm_model = model_id
+                     save_model_selection(st.session_state.llm_provider, st.session_state.model_category, model_id)
+                     logger.debug(f"💾 [Persistence] 快速选择o1-preview: {model_id}")
+                     st.rerun()
              
              with col2:
                  if st.button("⚡ GPT-4o Mini", key="quick_gpt4o_mini", use_container_width=True):
@@ -480,6 +497,13 @@ def render_sidebar():
                      st.session_state.llm_model = model_id
                      save_model_selection(st.session_state.llm_provider, st.session_state.model_category, model_id)
                      logger.debug(f"💾 [Persistence] 快速选择GPT-4o Mini: {model_id}")
+                     st.rerun()
+                 
+                 if st.button("💡 o1-mini", key="quick_o1_mini", use_container_width=True):
+                     model_id = "o1-mini"
+                     st.session_state.llm_model = model_id
+                     save_model_selection(st.session_state.llm_provider, st.session_state.model_category, model_id)
+                     logger.debug(f"💾 [Persistence] 快速选择o1-mini: {model_id}")
                      st.rerun()
 
              # 更新session state和持久化存储
@@ -530,7 +554,10 @@ def render_sidebar():
             # 模型选择
             custom_openai_options = [
                 "gpt-4o",
-                "gpt-4o-mini", 
+                "gpt-4o-2024-11-20",
+                "gpt-4o-mini",
+                "o1-preview",
+                "o1-mini",
                 "gpt-4-turbo",
                 "gpt-4",
                 "gpt-3.5-turbo",
@@ -538,11 +565,14 @@ def render_sidebar():
                 "claude-3-opus",
                 "claude-3-sonnet",
                 "claude-3-haiku",
-                "gemini-pro",
+                "gemini-2.5-pro",
+                "gemini-2.0-flash",
                 "gemini-1.5-pro",
                 "llama-3.1-8b",
                 "llama-3.1-70b",
                 "llama-3.1-405b",
+                "deepseek-chat",
+                "deepseek-reasoner",
                 "custom-model"
             ]
             
@@ -556,8 +586,11 @@ def render_sidebar():
                 options=custom_openai_options,
                 index=current_index,
                 format_func=lambda x: {
-                    "gpt-4o": "GPT-4o - OpenAI最新旗舰",
-                    "gpt-4o-mini": "GPT-4o Mini - 轻量旗舰",
+                    "gpt-4o": "GPT-4o - 🚀 OpenAI最新旗舰",
+                    "gpt-4o-2024-11-20": "GPT-4o (2024-11-20) - 最新版本",
+                    "gpt-4o-mini": "GPT-4o Mini - ⚡ 轻量高效",
+                    "o1-preview": "o1-preview - 🧠 OpenAI推理模型",
+                    "o1-mini": "o1-mini - 💡 轻量推理",
                     "gpt-4-turbo": "GPT-4 Turbo - 强化版",
                     "gpt-4": "GPT-4 - 经典版",
                     "gpt-3.5-turbo": "GPT-3.5 Turbo - 经济版",
@@ -565,11 +598,14 @@ def render_sidebar():
                     "claude-3-opus": "Claude 3 Opus - 强大性能",
                     "claude-3-sonnet": "Claude 3 Sonnet - 平衡版",
                     "claude-3-haiku": "Claude 3 Haiku - 快速版",
-                    "gemini-pro": "Gemini Pro - Google AI",
-                    "gemini-1.5-pro": "Gemini 1.5 Pro - 增强版",
+                    "gemini-2.5-pro": "Gemini 2.5 Pro - Google最新",
+                    "gemini-2.0-flash": "Gemini 2.0 Flash - 快速版",
+                    "gemini-1.5-pro": "Gemini 1.5 Pro - 稳定版",
                     "llama-3.1-8b": "Llama 3.1 8B - Meta开源",
                     "llama-3.1-70b": "Llama 3.1 70B - 大型开源",
                     "llama-3.1-405b": "Llama 3.1 405B - 超大开源",
+                    "deepseek-chat": "DeepSeek Chat - 💬 对话模型",
+                    "deepseek-reasoner": "DeepSeek Reasoner - 🧠 推理模型",
                     "custom-model": "自定义模型名称"
                 }[x],
                 help="选择要使用的模型，支持各种OpenAI兼容的模型",
