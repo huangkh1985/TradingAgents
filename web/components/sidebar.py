@@ -1042,9 +1042,6 @@ def render_sidebar():
             else:
                 return f"{key[:8]}... (格式异常)", "warning"
 
-        # 必需的API密钥
-        st.markdown("*必需配置:*")
-
         # 辅助函数：获取密钥
         def get_api_key(key_name, section=None):
             """从 Streamlit Secrets 或环境变量获取 API 密钥"""
@@ -1060,17 +1057,84 @@ def render_sidebar():
             except:
                 return os.getenv(key_name)
         
-        # 阿里百炼
-        dashscope_key = get_api_key("DASHSCOPE_API_KEY", "llm")
-        status, level = validate_api_key(dashscope_key, "dashscope")
-        if level == "success":
-            st.success(f"✅ 阿里百炼: {status}")
-        elif level == "warning":
-            st.warning(f"⚠️ 阿里百炼: {status}")
-        else:
-            st.error("❌ 阿里百炼: 未配置")
-
-        # FinnHub
+        # 根据选择的LLM提供商动态显示必需配置
+        st.markdown("*必需配置:*")
+        
+        # 显示当前选择的LLM提供商的API密钥状态
+        if llm_provider == "dashscope":
+            # 阿里百炼
+            dashscope_key = get_api_key("DASHSCOPE_API_KEY", "llm")
+            status, level = validate_api_key(dashscope_key, "dashscope")
+            if level == "success":
+                st.success(f"✅ 阿里百炼: {status}")
+            elif level == "warning":
+                st.warning(f"⚠️ 阿里百炼: {status}")
+            else:
+                st.error("❌ 阿里百炼: 未配置")
+        elif llm_provider == "openai" or llm_provider == "custom_openai":
+            # OpenAI
+            openai_key = get_api_key("OPENAI_API_KEY", "llm")
+            status, level = validate_api_key(openai_key, "openai")
+            if level == "success":
+                st.success(f"✅ OpenAI: {status}")
+            elif level == "warning":
+                st.warning(f"⚠️ OpenAI: {status}")
+            else:
+                st.error("❌ OpenAI: 未配置")
+        elif llm_provider == "deepseek":
+            # DeepSeek
+            deepseek_key = get_api_key("DEEPSEEK_API_KEY", "llm")
+            status, level = validate_api_key(deepseek_key, "deepseek")
+            if level == "success":
+                st.success(f"✅ DeepSeek: {status}")
+            elif level == "warning":
+                st.warning(f"⚠️ DeepSeek: {status}")
+            else:
+                st.error("❌ DeepSeek: 未配置")
+        elif llm_provider == "google":
+            # Google AI
+            google_key = get_api_key("GOOGLE_API_KEY", "llm")
+            status, level = validate_api_key(google_key, "google")
+            if level == "success":
+                st.success(f"✅ Google AI: {status}")
+            elif level == "warning":
+                st.warning(f"⚠️ Google AI: {status}")
+            else:
+                st.error("❌ Google AI: 未配置")
+        elif llm_provider == "anthropic":
+            # Anthropic
+            anthropic_key = get_api_key("ANTHROPIC_API_KEY", "llm")
+            status, level = validate_api_key(anthropic_key, "anthropic")
+            if level == "success":
+                st.success(f"✅ Anthropic: {status}")
+            elif level == "warning":
+                st.warning(f"⚠️ Anthropic: {status}")
+            else:
+                st.error("❌ Anthropic: 未配置")
+        elif llm_provider == "openrouter":
+            # OpenRouter
+            openrouter_key = get_api_key("OPENROUTER_API_KEY", "llm")
+            if openrouter_key:
+                st.success(f"✅ OpenRouter: {openrouter_key[:8]}...")
+            else:
+                st.error("❌ OpenRouter: 未配置")
+        elif llm_provider == "siliconflow":
+            # 硅基流动
+            siliconflow_key = get_api_key("SILICONFLOW_API_KEY", "llm")
+            if siliconflow_key:
+                st.success(f"✅ 硅基流动: {siliconflow_key[:8]}...")
+            else:
+                st.error("❌ 硅基流动: 未配置")
+        elif llm_provider == "qianfan":
+            # 千帆
+            qianfan_ak = get_api_key("QIANFAN_AK", "llm")
+            qianfan_sk = get_api_key("QIANFAN_SK", "llm")
+            if qianfan_ak and qianfan_sk:
+                st.success(f"✅ 千帆: AK {qianfan_ak[:8]}..., SK {qianfan_sk[:8]}...")
+            else:
+                st.error("❌ 千帆: 未配置 (需要AK和SK)")
+        
+        # 数据源API密钥 - 总是显示为必需
         finnhub_key = get_api_key("FINNHUB_API_KEY", "data_sources")
         status, level = validate_api_key(finnhub_key, "finnhub")
         if level == "success":
@@ -1080,21 +1144,68 @@ def render_sidebar():
         else:
             st.error("❌ FinnHub: 未配置")
 
-        # 可选的API密钥
+        # 可选的API密钥 - 只显示未被选择为主LLM的提供商
         st.markdown("*可选配置:*")
 
-        # DeepSeek
-        deepseek_key = os.getenv("DEEPSEEK_API_KEY")
-        status, level = validate_api_key(deepseek_key, "deepseek")
-        if level == "success":
-            st.success(f"✅ DeepSeek: {status}")
-        elif level == "warning":
-            st.warning(f"⚠️ DeepSeek: {status}")
-        else:
-            st.info("ℹ️ DeepSeek: 未配置")
+        # 阿里百炼 (仅当不是当前选择的LLM时显示)
+        if llm_provider != "dashscope":
+            dashscope_key = get_api_key("DASHSCOPE_API_KEY", "llm")
+            status, level = validate_api_key(dashscope_key, "dashscope")
+            if level == "success":
+                st.success(f"✅ 阿里百炼: {status}")
+            elif level == "warning":
+                st.warning(f"⚠️ 阿里百炼: {status}")
+            else:
+                st.info("ℹ️ 阿里百炼: 未配置")
 
-        # Tushare
-        tushare_key = os.getenv("TUSHARE_TOKEN")
+        # DeepSeek (仅当不是当前选择的LLM时显示)
+        if llm_provider != "deepseek":
+            deepseek_key = get_api_key("DEEPSEEK_API_KEY", "llm")
+            status, level = validate_api_key(deepseek_key, "deepseek")
+            if level == "success":
+                st.success(f"✅ DeepSeek: {status}")
+            elif level == "warning":
+                st.warning(f"⚠️ DeepSeek: {status}")
+            else:
+                st.info("ℹ️ DeepSeek: 未配置")
+
+        # Google AI (仅当不是当前选择的LLM时显示)
+        if llm_provider != "google":
+            google_key = get_api_key("GOOGLE_API_KEY", "llm")
+            status, level = validate_api_key(google_key, "google")
+            if level == "success":
+                st.success(f"✅ Google AI: {status}")
+            elif level == "warning":
+                st.warning(f"⚠️ Google AI: {status}")
+            else:
+                st.info("ℹ️ Google AI: 未配置")
+
+        # OpenAI (仅当不是当前选择的LLM时显示)
+        if llm_provider not in ["openai", "custom_openai"]:
+            openai_key = get_api_key("OPENAI_API_KEY", "llm")
+            if openai_key and openai_key != "your_openai_api_key_here":
+                status, level = validate_api_key(openai_key, "openai")
+                if level == "success":
+                    st.success(f"✅ OpenAI: {status}")
+                elif level == "warning":
+                    st.warning(f"⚠️ OpenAI: {status}")
+                else:
+                    st.info("ℹ️ OpenAI: 未配置")
+
+        # Anthropic (仅当不是当前选择的LLM时显示)
+        if llm_provider != "anthropic":
+            anthropic_key = get_api_key("ANTHROPIC_API_KEY", "llm")
+            if anthropic_key and anthropic_key != "your_anthropic_api_key_here":
+                status, level = validate_api_key(anthropic_key, "anthropic")
+                if level == "success":
+                    st.success(f"✅ Anthropic: {status}")
+                elif level == "warning":
+                    st.warning(f"⚠️ Anthropic: {status}")
+                else:
+                    st.info("ℹ️ Anthropic: 未配置")
+
+        # Tushare - 数据源，总是显示为可选
+        tushare_key = get_api_key("TUSHARE_TOKEN", "data_sources")
         status, level = validate_api_key(tushare_key, "tushare")
         if level == "success":
             st.success(f"✅ Tushare: {status}")
@@ -1102,34 +1213,6 @@ def render_sidebar():
             st.warning(f"⚠️ Tushare: {status}")
         else:
             st.info("ℹ️ Tushare: 未配置")
-
-        # Google AI
-        google_key = os.getenv("GOOGLE_API_KEY")
-        status, level = validate_api_key(google_key, "google")
-        if level == "success":
-            st.success(f"✅ Google AI: {status}")
-        elif level == "warning":
-            st.warning(f"⚠️ Google AI: {status}")
-        else:
-            st.info("ℹ️ Google AI: 未配置")
-
-        # OpenAI (如果配置了且不是默认值)
-        openai_key = os.getenv("OPENAI_API_KEY")
-        if openai_key and openai_key != "your_openai_api_key_here":
-            status, level = validate_api_key(openai_key, "openai")
-            if level == "success":
-                st.success(f"✅ OpenAI: {status}")
-            elif level == "warning":
-                st.warning(f"⚠️ OpenAI: {status}")
-
-        # Anthropic (如果配置了且不是默认值)
-        anthropic_key = os.getenv("ANTHROPIC_API_KEY")
-        if anthropic_key and anthropic_key != "your_anthropic_api_key_here":
-            status, level = validate_api_key(anthropic_key, "anthropic")
-            if level == "success":
-                st.success(f"✅ Anthropic: {status}")
-            elif level == "warning":
-                st.warning(f"⚠️ Anthropic: {status}")
 
         st.markdown("---")
 
