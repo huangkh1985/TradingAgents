@@ -18,41 +18,47 @@ def check_api_keys():
     
     # 构建详细状态
     details = {
-        "DASHSCOPE_API_KEY": {
-            "configured": bool(dashscope_key),
-            "display": f"{dashscope_key[:12]}..." if dashscope_key else "未配置",
-            "required": True,
-            "description": "阿里百炼API密钥"
-        },
-        "FINNHUB_API_KEY": {
-            "configured": bool(finnhub_key),
-            "display": f"{finnhub_key[:12]}..." if finnhub_key else "未配置",
-            "required": True,
-            "description": "金融数据API密钥"
-        },
         "OPENAI_API_KEY": {
             "configured": bool(openai_key),
             "display": f"{openai_key[:12]}..." if openai_key else "未配置",
             "required": False,
-            "description": "OpenAI API密钥"
+            "description": "OpenAI API密钥",
+            "category": "llm"
+        },
+        "DASHSCOPE_API_KEY": {
+            "configured": bool(dashscope_key),
+            "display": f"{dashscope_key[:12]}..." if dashscope_key else "未配置",
+            "required": False,
+            "description": "阿里百炼API密钥",
+            "category": "llm"
         },
         "ANTHROPIC_API_KEY": {
             "configured": bool(anthropic_key),
             "display": f"{anthropic_key[:12]}..." if anthropic_key else "未配置",
             "required": False,
-            "description": "Anthropic API密钥"
+            "description": "Anthropic API密钥",
+            "category": "llm"
         },
         "GOOGLE_API_KEY": {
             "configured": bool(google_key),
             "display": f"{google_key[:12]}..." if google_key else "未配置",
             "required": False,
-            "description": "Google AI API密钥"
+            "description": "Google AI API密钥",
+            "category": "llm"
         },
         "QIANFAN_ACCESS_KEY": {
             "configured": bool(qianfan_key),
             "display": f"{qianfan_key[:16]}..." if qianfan_key else "未配置",
             "required": False,
-            "description": "文心一言（千帆）API Key（OpenAI兼容），一般以 bce-v3/ 开头"
+            "description": "文心一言（千帆）API Key（OpenAI兼容），一般以 bce-v3/ 开头",
+            "category": "llm"
+        },
+        "FINNHUB_API_KEY": {
+            "configured": bool(finnhub_key),
+            "display": f"{finnhub_key[:12]}..." if finnhub_key else "未配置",
+            "required": False,
+            "description": "金融数据API密钥（可选，可使用免费的AKShare）",
+            "category": "data"
         },
         # QIANFAN_SECRET_KEY 不再用于OpenAI兼容路径，仅保留给脚本示例使用
         # "QIANFAN_SECRET_KEY": {
@@ -63,20 +69,29 @@ def check_api_keys():
         # },
     }
     
-    # 检查必需的API密钥
+    # 检查至少配置了一个 LLM API 密钥
+    llm_keys = [key for key, info in details.items() if info.get("category") == "llm"]
+    llm_configured = any(details[key]["configured"] for key in llm_keys)
+    
+    # 检查必需的API密钥（现在只要求至少一个 LLM）
     required_keys = [key for key, info in details.items() if info["required"]]
     missing_required = [key for key in required_keys if not details[key]["configured"]]
     
+    # 如果没有配置任何 LLM，标记为不完整
+    all_configured = llm_configured and len(missing_required) == 0
+    
     return {
-        "all_configured": len(missing_required) == 0,
+        "all_configured": all_configured,
         "required_configured": len(missing_required) == 0,
         "missing_required": missing_required,
+        "llm_configured": llm_configured,
         "details": details,
         "summary": {
             "total": len(details),
             "configured": sum(1 for info in details.values() if info["configured"]),
             "required": len(required_keys),
-            "required_configured": len(required_keys) - len(missing_required)
+            "required_configured": len(required_keys) - len(missing_required),
+            "llm_configured": llm_configured
         }
     }
 
@@ -85,10 +100,12 @@ def get_api_key_status_message():
     
     status = check_api_keys()
     
-    if status["all_configured"]:
-        return "✅ 所有必需的API密钥已配置完成"
+    if not status["llm_configured"]:
+        return "❌ 至少需要配置一个 LLM API 密钥（OpenAI、DashScope、Anthropic 等）"
+    elif status["all_configured"]:
+        return "✅ API 密钥配置完成，可以开始使用"
     elif status["required_configured"]:
-        return "✅ 必需的API密钥已配置，可选API密钥未配置"
+        return "✅ 基础配置完成，可选配置未完成"
     else:
         missing = ", ".join(status["missing_required"])
         return f"❌ 缺少必需的API密钥: {missing}"

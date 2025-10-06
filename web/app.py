@@ -997,42 +997,88 @@ def main():
     api_status = check_api_keys()
     
     if not api_status['all_configured']:
-        st.error("⚠️ API密钥配置不完整，请先配置必要的API密钥")
+        if not api_status.get('llm_configured', False):
+            st.error("⚠️ 请先配置至少一个 LLM API 密钥")
+        else:
+            st.warning("⚠️ 部分可选配置未完成，但可以开始使用")
         
-        with st.expander("📋 API密钥配置指南", expanded=True):
+        with st.expander("📋 API密钥配置指南", expanded=not api_status.get('llm_configured', False)):
             st.markdown("""
-            ### 🔑 必需的API密钥
+            ### 🔑 必需配置（至少选一个）
             
-            1. **阿里百炼API密钥** (DASHSCOPE_API_KEY)
+            **LLM 服务商**（必选其一）：
+            
+            1. **OpenAI** ⭐ 推荐
+               - 获取地址: https://platform.openai.com/
+               - 配置: `OPENAI_API_KEY` 和 `OPENAI_API_BASE`（可选）
+               - 用途: AI 模型推理
+            
+            2. **阿里云通义千问** 🇨🇳 国内推荐
                - 获取地址: https://dashscope.aliyun.com/
-               - 用途: AI模型推理
+               - 配置: `DASHSCOPE_API_KEY`
+               - 用途: AI 模型推理（无需科学上网）
             
-            2. **金融数据API密钥** (FINNHUB_API_KEY)  
-               - 获取地址: https://finnhub.io/
-               - 用途: 获取股票数据
+            3. **Anthropic Claude**
+               - 获取地址: https://console.anthropic.com/
+               - 配置: `ANTHROPIC_API_KEY`
+               - 用途: AI 模型推理
             
-            ### ⚙️ 配置方法
+            ### 📊 可选配置
             
-            1. 复制项目根目录的 `.env.example` 为 `.env`
-            2. 编辑 `.env` 文件，填入您的真实API密钥
-            3. 重启Web应用
+            **数据源**（可选）：
+            - **AKShare**: 免费，无需配置，自动启用 ✅
+            - **Finnhub**: 获取地址 https://finnhub.io/ (免费层 60次/分钟)
+            - **Tushare**: A股专业数据
             
-            ```bash
-            # .env 文件示例
-            DASHSCOPE_API_KEY=sk-your-dashscope-key
-            FINNHUB_API_KEY=your-finnhub-key
+            ### ⚙️ Streamlit Cloud 配置方法
+            
+            1. 进入应用 **Settings** → **Secrets**
+            2. 粘贴以下配置模板（填入真实密钥）
+            3. 点击 **Save** 保存
+            
+            ```toml
+            [llm]
+            # 选择一个配置即可
+            OPENAI_API_KEY = "sk-your-openai-key"
+            OPENAI_API_BASE = "https://api.openai.com/v1"  # 可选
+            
+            # 或使用阿里云
+            # DASHSCOPE_API_KEY = "sk-your-dashscope-key"
+            
+            [data_sources]
+            # 可选：美股数据（免费层）
+            # FINNHUB_API_KEY = "your-finnhub-key"
             ```
             """)
         
         # 显示当前API密钥状态
         st.subheader("🔍 当前API密钥状态")
-        for key, status in api_status['details'].items():
-            if status['configured']:
-                st.success(f"✅ {key}: {status['display']}")
-            else:
-                st.error(f"❌ {key}: 未配置")
         
-        return
+        # LLM 配置状态
+        st.markdown("**LLM 服务商** (至少选一个):")
+        llm_configured = False
+        for key, status in api_status['details'].items():
+            if status.get('category') == 'llm':
+                if status['configured']:
+                    st.success(f"✅ {status['description']}: {status['display']}")
+                    llm_configured = True
+                else:
+                    st.info(f"⚪ {status['description']}: 未配置")
+        
+        # 数据源配置状态
+        st.markdown("**数据源** (可选):")
+        st.success("✅ AKShare: 已启用（免费，无需配置）")
+        for key, status in api_status['details'].items():
+            if status.get('category') == 'data':
+                if status['configured']:
+                    st.success(f"✅ {status['description']}: {status['display']}")
+                else:
+                    st.info(f"⚪ {status['description']}: 未配置")
+        
+        # 如果没有配置任何 LLM，阻止继续
+        if not llm_configured:
+            st.error("❌ 请至少配置一个 LLM API 密钥后再继续")
+            return
     
     # 渲染侧边栏
     config = render_sidebar()
