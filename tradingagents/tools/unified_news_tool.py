@@ -116,20 +116,34 @@ class UnifiedNewsAnalyzer:
         except Exception as e:
             logger.warning(f"[统一新闻工具] 东方财富新闻获取失败: {e}")
         
-        # 优先级2: Google新闻（中文搜索）
+        # 优先级2: Google Custom Search API（官方API，更稳定）
+        try:
+            from tradingagents.dataflows.google_custom_search import get_google_custom_search_news
+            logger.info(f"[统一新闻工具] 尝试Google Custom Search API...")
+            query = f"{stock_code} 股票 新闻 财报 业绩"
+            result = get_google_custom_search_news(query, curr_date, look_back_days=7)
+            if result and len(result.strip()) > 100:
+                logger.info(f"[统一新闻工具] ✅ Google Custom Search API获取成功: {len(result)} 字符")
+                return self._format_news_result(result, "Google Custom Search API", model_info)
+            else:
+                logger.debug(f"[统一新闻工具] Google Custom Search API未返回数据（可能未配置）")
+        except Exception as e:
+            logger.warning(f"[统一新闻工具] Google Custom Search API失败: {e}")
+        
+        # 优先级3: Google新闻（网页爬虫，备用方案）
         try:
             if hasattr(self.toolkit, 'get_google_news'):
-                logger.info(f"[统一新闻工具] 尝试Google新闻...")
+                logger.info(f"[统一新闻工具] 尝试Google新闻（网页爬虫）...")
                 query = f"{stock_code} 股票 新闻 财报 业绩"
                 # 使用LangChain工具的正确调用方式：.invoke()方法和字典参数
                 result = self.toolkit.get_google_news.invoke({"query": query, "curr_date": curr_date})
                 if result and len(result.strip()) > 50:
-                    logger.info(f"[统一新闻工具] ✅ Google新闻获取成功: {len(result)} 字符")
-                    return self._format_news_result(result, "Google新闻", model_info)
+                    logger.info(f"[统一新闻工具] ✅ Google新闻（网页爬虫）获取成功: {len(result)} 字符")
+                    return self._format_news_result(result, "Google新闻（网页爬虫）", model_info)
         except Exception as e:
-            logger.warning(f"[统一新闻工具] Google新闻获取失败: {e}")
+            logger.warning(f"[统一新闻工具] Google新闻（网页爬虫）获取失败: {e}")
         
-        # 优先级3: OpenAI全球新闻
+        # 优先级4: OpenAI全球新闻
         try:
             if hasattr(self.toolkit, 'get_global_news_openai'):
                 logger.info(f"[统一新闻工具] 尝试OpenAI全球新闻...")
@@ -150,18 +164,32 @@ class UnifiedNewsAnalyzer:
         # 获取当前日期
         curr_date = datetime.now().strftime("%Y-%m-%d")
         
-        # 优先级1: Google新闻（港股搜索）
+        # 优先级1: Google Custom Search API（官方API，更稳定）
+        try:
+            from tradingagents.dataflows.google_custom_search import get_google_custom_search_news
+            logger.info(f"[统一新闻工具] 尝试Google Custom Search API（港股）...")
+            query = f"{stock_code} 港股 香港股票 新闻 财报"
+            result = get_google_custom_search_news(query, curr_date, look_back_days=7)
+            if result and len(result.strip()) > 100:
+                logger.info(f"[统一新闻工具] ✅ Google Custom Search API（港股）获取成功: {len(result)} 字符")
+                return self._format_news_result(result, "Google Custom Search API（港股）", model_info)
+            else:
+                logger.debug(f"[统一新闻工具] Google Custom Search API未返回数据（可能未配置）")
+        except Exception as e:
+            logger.warning(f"[统一新闻工具] Google Custom Search API（港股）失败: {e}")
+        
+        # 优先级2: Google新闻（网页爬虫，港股搜索）
         try:
             if hasattr(self.toolkit, 'get_google_news'):
-                logger.info(f"[统一新闻工具] 尝试Google港股新闻...")
+                logger.info(f"[统一新闻工具] 尝试Google港股新闻（网页爬虫）...")
                 query = f"{stock_code} 港股 香港股票 新闻"
                 # 使用LangChain工具的正确调用方式：.invoke()方法和字典参数
                 result = self.toolkit.get_google_news.invoke({"query": query, "curr_date": curr_date})
                 if result and len(result.strip()) > 50:
-                    logger.info(f"[统一新闻工具] ✅ Google港股新闻获取成功: {len(result)} 字符")
-                    return self._format_news_result(result, "Google港股新闻", model_info)
+                    logger.info(f"[统一新闻工具] ✅ Google港股新闻（网页爬虫）获取成功: {len(result)} 字符")
+                    return self._format_news_result(result, "Google港股新闻（网页爬虫）", model_info)
         except Exception as e:
-            logger.warning(f"[统一新闻工具] Google港股新闻获取失败: {e}")
+            logger.warning(f"[统一新闻工具] Google港股新闻（网页爬虫）获取失败: {e}")
         
         # 优先级2: OpenAI全球新闻
         try:
@@ -196,7 +224,21 @@ class UnifiedNewsAnalyzer:
         # 获取当前日期
         curr_date = datetime.now().strftime("%Y-%m-%d")
         
-        # 优先级1: OpenAI全球新闻
+        # 优先级1: Google Custom Search API（官方API，更稳定）
+        try:
+            from tradingagents.dataflows.google_custom_search import get_google_custom_search_news
+            logger.info(f"[统一新闻工具] 尝试Google Custom Search API（美股）...")
+            query = f"{stock_code} stock news earnings financial report"
+            result = get_google_custom_search_news(query, curr_date, look_back_days=7)
+            if result and len(result.strip()) > 100:
+                logger.info(f"[统一新闻工具] ✅ Google Custom Search API（美股）获取成功: {len(result)} 字符")
+                return self._format_news_result(result, "Google Custom Search API（美股）", model_info)
+            else:
+                logger.debug(f"[统一新闻工具] Google Custom Search API未返回数据（可能未配置）")
+        except Exception as e:
+            logger.warning(f"[统一新闻工具] Google Custom Search API（美股）失败: {e}")
+        
+        # 优先级2: OpenAI全球新闻
         try:
             if hasattr(self.toolkit, 'get_global_news_openai'):
                 logger.info(f"[统一新闻工具] 尝试OpenAI美股新闻...")
@@ -208,10 +250,10 @@ class UnifiedNewsAnalyzer:
         except Exception as e:
             logger.warning(f"[统一新闻工具] OpenAI美股新闻获取失败: {e}")
         
-        # 优先级2: Google新闻（英文搜索）
+        # 优先级3: Google新闻（网页爬虫，英文搜索）
         try:
             if hasattr(self.toolkit, 'get_google_news'):
-                logger.info(f"[统一新闻工具] 尝试Google美股新闻...")
+                logger.info(f"[统一新闻工具] 尝试Google美股新闻（网页爬虫）...")
                 query = f"{stock_code} stock news earnings financial"
                 # 使用LangChain工具的正确调用方式：.invoke()方法和字典参数
                 result = self.toolkit.get_google_news.invoke({"query": query, "curr_date": curr_date})

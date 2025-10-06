@@ -168,9 +168,88 @@ def check_deepseek_api():
         print(f"   错误类型: {type(e).__name__}")
         return False
 
+def check_google_custom_search():
+    """检查 Google Custom Search API"""
+    print_section("5. 检查 Google Custom Search API")
+    
+    api_key = os.getenv('GOOGLE_CUSTOM_SEARCH_API_KEY')
+    cx = os.getenv('GOOGLE_CUSTOM_SEARCH_CX')
+    
+    # 尝试从Streamlit Secrets读取
+    if not api_key or not cx:
+        try:
+            import streamlit as st
+            if hasattr(st, 'secrets'):
+                if 'google_search' in st.secrets:
+                    api_key = st.secrets['google_search'].get('API_KEY')
+                    cx = st.secrets['google_search'].get('CX')
+                else:
+                    api_key = st.secrets.get('GOOGLE_CUSTOM_SEARCH_API_KEY')
+                    cx = st.secrets.get('GOOGLE_CUSTOM_SEARCH_CX')
+        except:
+            pass
+    
+    if not api_key or not cx:
+        print("❌ Google Custom Search API 未配置")
+        print("\n💡 配置方法:")
+        print("   方式1 - 环境变量:")
+        print("     export GOOGLE_CUSTOM_SEARCH_API_KEY=xxx")
+        print("     export GOOGLE_CUSTOM_SEARCH_CX=xxx")
+        print("\n   方式2 - Streamlit Secrets:")
+        print("     [google_search]")
+        print("     API_KEY = \"xxx\"")
+        print("     CX = \"xxx\"")
+        return False
+    
+    print(f"✅ API Key 已配置: {api_key[:20]}...")
+    print(f"✅ CX 已配置: {cx[:15]}...")
+    
+    # 测试搜索
+    try:
+        import requests
+        
+        print("\n🔍 测试搜索 '002183 股票 新闻'...")
+        start_time = datetime.now()
+        
+        url = "https://www.googleapis.com/customsearch/v1"
+        params = {
+            'key': api_key,
+            'cx': cx,
+            'q': '002183 股票 新闻',
+            'num': 3
+        }
+        
+        response = requests.get(url, params=params, timeout=10)
+        elapsed = (datetime.now() - start_time).total_seconds()
+        
+        if response.status_code == 200:
+            data = response.json()
+            items = data.get('items', [])
+            print(f"✅ Google Custom Search API 连接成功，获取到 {len(items)} 条结果，耗时 {elapsed:.2f} 秒")
+            if items:
+                print(f"\n📰 结果示例:")
+                for i, item in enumerate(items[:2], 1):
+                    print(f"   {i}. {item.get('title', 'N/A')[:60]}...")
+            return True
+        elif response.status_code == 403:
+            print(f"❌ API密钥无效或未启用Custom Search API")
+            print(f"   请访问: https://console.cloud.google.com/apis/library/customsearch.googleapis.com")
+            return False
+        elif response.status_code == 429:
+            print(f"❌ API配额已用完（免费版每天100次）")
+            return False
+        else:
+            print(f"❌ Google Custom Search API 返回错误: {response.status_code}")
+            print(f"   {response.text[:200]}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Google Custom Search API 测试失败: {e}")
+        return False
+
 def check_finnhub_api():
     """检查 FinnHub API"""
-    print_section("5. 检查 FinnHub API（美股新闻）")
+    print_section("6. 检查 FinnHub API（美股新闻）")
     
     api_key = os.getenv('FINNHUB_API_KEY')
     
@@ -211,7 +290,7 @@ def check_finnhub_api():
 
 def check_unified_news_tool():
     """检查统一新闻工具"""
-    print_section("6. 检查统一新闻工具集成")
+    print_section("7. 检查统一新闻工具集成")
     
     try:
         from tradingagents.tools.unified_news_tool import create_unified_news_tool
@@ -303,6 +382,7 @@ def main():
         "OpenAI API": check_openai_api(),
         "Google AI API": check_google_api(),
         "DeepSeek API": check_deepseek_api(),
+        "Google Custom Search API": check_google_custom_search(),
         "FinnHub API": check_finnhub_api(),
         "统一新闻工具": check_unified_news_tool()
     }
