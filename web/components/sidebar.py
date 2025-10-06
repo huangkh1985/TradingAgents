@@ -221,8 +221,7 @@ def render_sidebar():
                 logger.warning("⚠️ [自动修复] 检测到 dashscope 未配置，自动切换到 openai")
                 st.session_state.llm_provider = 'openai'
                 st.session_state.model_category = 'openai'
-                # 保存更新后的配置
-                from ..utils.persistence import save_model_selection
+                # 保存更新后的配置 (使用已在模块顶部导入的函数)
                 save_model_selection('openai', 'openai', st.session_state.llm_model)
 
         # 显示当前session state状态（调试用）
