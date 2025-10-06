@@ -992,8 +992,23 @@ def render_sidebar():
         # 必需的API密钥
         st.markdown("*必需配置:*")
 
+        # 辅助函数：获取密钥
+        def get_api_key(key_name, section=None):
+            """从 Streamlit Secrets 或环境变量获取 API 密钥"""
+            try:
+                if section:
+                    return st.secrets.get(section, {}).get(key_name) or os.getenv(key_name)
+                else:
+                    # 尝试从所有 section 查找
+                    for sec in st.secrets:
+                        if isinstance(st.secrets[sec], dict) and key_name in st.secrets[sec]:
+                            return st.secrets[sec][key_name]
+                    return os.getenv(key_name)
+            except:
+                return os.getenv(key_name)
+        
         # 阿里百炼
-        dashscope_key = os.getenv("DASHSCOPE_API_KEY")
+        dashscope_key = get_api_key("DASHSCOPE_API_KEY", "llm")
         status, level = validate_api_key(dashscope_key, "dashscope")
         if level == "success":
             st.success(f"✅ 阿里百炼: {status}")
@@ -1003,7 +1018,7 @@ def render_sidebar():
             st.error("❌ 阿里百炼: 未配置")
 
         # FinnHub
-        finnhub_key = os.getenv("FINNHUB_API_KEY")
+        finnhub_key = get_api_key("FINNHUB_API_KEY", "data_sources")
         status, level = validate_api_key(finnhub_key, "finnhub")
         if level == "success":
             st.success(f"✅ FinnHub: {status}")

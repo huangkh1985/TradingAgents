@@ -4,16 +4,37 @@ API密钥检查工具
 
 import os
 
+def _get_secret(key, section=None):
+    """
+    获取密钥，支持多种来源：
+    1. Streamlit Secrets (优先，用于 Streamlit Cloud)
+    2. 环境变量 (用于本地开发)
+    """
+    try:
+        import streamlit as st
+        # 尝试从 Streamlit Secrets 读取
+        if section:
+            return st.secrets.get(section, {}).get(key)
+        else:
+            # 尝试从所有 section 中查找
+            for sec in st.secrets:
+                if isinstance(st.secrets[sec], dict) and key in st.secrets[sec]:
+                    return st.secrets[sec][key]
+            return None
+    except:
+        # 如果不在 Streamlit 环境或 Secrets 不可用，使用环境变量
+        return os.getenv(key)
+
 def check_api_keys():
     """检查所有必要的API密钥是否已配置"""
 
-    # 检查各个API密钥
-    dashscope_key = os.getenv("DASHSCOPE_API_KEY")
-    finnhub_key = os.getenv("FINNHUB_API_KEY")
-    openai_key = os.getenv("OPENAI_API_KEY")
-    anthropic_key = os.getenv("ANTHROPIC_API_KEY")
-    google_key = os.getenv("GOOGLE_API_KEY")
-    qianfan_key = os.getenv("QIANFAN_API_KEY")
+    # 检查各个API密钥（优先从 Streamlit Secrets 读取）
+    dashscope_key = _get_secret("DASHSCOPE_API_KEY", "llm") or os.getenv("DASHSCOPE_API_KEY")
+    finnhub_key = _get_secret("FINNHUB_API_KEY", "data_sources") or os.getenv("FINNHUB_API_KEY")
+    openai_key = _get_secret("OPENAI_API_KEY", "llm") or os.getenv("OPENAI_API_KEY")
+    anthropic_key = _get_secret("ANTHROPIC_API_KEY", "llm") or os.getenv("ANTHROPIC_API_KEY")
+    google_key = _get_secret("GOOGLE_API_KEY", "llm") or os.getenv("GOOGLE_API_KEY")
+    qianfan_key = _get_secret("QIANFAN_ACCESS_KEY", "llm") or os.getenv("QIANFAN_API_KEY")
 
     
     # 构建详细状态
