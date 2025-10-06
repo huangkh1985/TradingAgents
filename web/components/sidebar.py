@@ -207,6 +207,23 @@ def render_sidebar():
         if 'llm_model' not in st.session_state:
             st.session_state.llm_model = saved_config['model']
             logger.debug(f"🔧 [Persistence] 恢复 llm_model: {st.session_state.llm_model}")
+        
+        # 自动修复无效配置：如果选择了 dashscope 但未配置 API 密钥，自动切换到 openai
+        if st.session_state.llm_provider == 'dashscope':
+            try:
+                from tradingagents.utils.secrets_helper import get_dashscope_api_key
+                dashscope_key = get_dashscope_api_key()
+            except ImportError:
+                import os
+                dashscope_key = os.getenv('DASHSCOPE_API_KEY')
+            
+            if not dashscope_key:
+                logger.warning("⚠️ [自动修复] 检测到 dashscope 未配置，自动切换到 openai")
+                st.session_state.llm_provider = 'openai'
+                st.session_state.model_category = 'openai'
+                # 保存更新后的配置
+                from ..utils.persistence import save_model_selection
+                save_model_selection('openai', 'openai', st.session_state.llm_model)
 
         # 显示当前session state状态（调试用）
         logger.debug(f"🔍 [Session State] 当前状态 - provider: {st.session_state.llm_provider}, category: {st.session_state.model_category}, model: {st.session_state.llm_model}")
