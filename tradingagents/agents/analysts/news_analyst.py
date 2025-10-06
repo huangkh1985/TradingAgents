@@ -285,6 +285,10 @@ def create_news_analyst(llm, toolkit):
             # 检查工具调用情况
             tool_call_count = len(result.tool_calls) if hasattr(result, 'tool_calls') else 0
             logger.info(f"[新闻分析师] LLM调用了 {tool_call_count} 个工具")
+            logger.info(f"[新闻分析师] 🔍 result类型: {type(result).__name__}")
+            logger.info(f"[新闻分析师] 🔍 result.content长度: {len(result.content) if hasattr(result, 'content') else 0}")
+            if hasattr(result, 'content') and result.content:
+                logger.info(f"[新闻分析师] 🔍 content预览(前200字符): {result.content[:200]}")
             
             if tool_call_count == 0:
                 logger.warning(f"[新闻分析师] ⚠️ {llm.__class__.__name__} 没有调用任何工具，启动补救机制...")
@@ -340,6 +344,14 @@ def create_news_analyst(llm, toolkit):
         clean_message = AIMessage(content=report)
         
         logger.info(f"[新闻分析师] ✅ 返回清洁消息，报告长度: {len(report)} 字符")
+        
+        # 🔍 最终调试：检查返回值
+        logger.info(f"[新闻分析师] 🔍 最终返回的report类型: {type(report).__name__}")
+        logger.info(f"[新闻分析师] 🔍 最终返回的report长度: {len(report)}")
+        if report and len(report) > 0:
+            logger.info(f"[新闻分析师] 🔍 最终返回内容预览(前300字符): {report[:300]}")
+        else:
+            logger.error(f"[新闻分析师] ❌ 警告：返回的report为空！")
 
         return {
             "messages": [clean_message],
