@@ -127,3 +127,32 @@ def get_tushare_token() -> Optional[str]:
     return get_api_key("TUSHARE_TOKEN", "data_sources")
 
 
+def get_openrouter_api_key() -> Optional[str]:
+    """获取 OpenRouter API 密钥"""
+    # OpenRouter 可以使用 OPENROUTER_API_KEY 或 OPENAI_API_KEY
+    key = get_api_key("OPENROUTER_API_KEY", "llm")
+    if not key:
+        key = get_api_key("OPENAI_API_KEY", "llm")
+    return key
+
+
+def get_siliconflow_api_key() -> Optional[str]:
+    """获取 SiliconFlow API 密钥"""
+    return get_api_key("SILICONFLOW_API_KEY", "llm")
+
+
+def get_qianfan_ak() -> Optional[str]:
+    """获取 千帆 Access Key"""
+    return get_api_key("QIANFAN_AK", "llm")
+
+
+def get_qianfan_sk() -> Optional[str]:
+    """获取 千帆 Secret Key"""
+    return get_api_key("QIANFAN_SK", "llm")
+
+
+def get_custom_openai_api_key() -> Optional[str]:
+    """获取自定义 OpenAI API 密钥"""
+    return get_api_key("CUSTOM_OPENAI_API_KEY", "llm")
+
+
