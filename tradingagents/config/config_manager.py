@@ -94,7 +94,14 @@ class ConfigManager:
             load_dotenv(env_file, override=True)
 
     def _get_env_api_key(self, provider: str) -> str:
-        """从环境变量获取API密钥"""
+        """从环境变量或 Streamlit Secrets 获取API密钥"""
+        # 导入 secrets_helper（支持 Streamlit Secrets）
+        try:
+            from tradingagents.utils.secrets_helper import get_api_key
+        except ImportError:
+            # 回退到简单的 os.getenv
+            get_api_key = lambda key, section=None: os.getenv(key, "")
+        
         env_key_map = {
             "dashscope": "DASHSCOPE_API_KEY",
             "openai": "OPENAI_API_KEY",
@@ -105,7 +112,8 @@ class ConfigManager:
 
         env_key = env_key_map.get(provider.lower())
         if env_key:
-            api_key = os.getenv(env_key, "")
+            # 优先从 Streamlit Secrets 读取，回退到环境变量
+            api_key = get_api_key(env_key, "llm") or ""
             # 对OpenAI密钥进行格式验证（始终启用）
             if provider.lower() == "openai" and api_key:
                 if not self.validate_openai_api_key_format(api_key):

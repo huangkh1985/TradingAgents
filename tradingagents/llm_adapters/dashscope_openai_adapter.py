@@ -15,6 +15,14 @@ from ..config.config_manager import token_tracker
 from tradingagents.utils.logging_manager import get_logger
 logger = get_logger('agents')
 
+# 导入 Secrets 辅助工具
+try:
+    from tradingagents.utils.secrets_helper import get_dashscope_api_key
+except ImportError:
+    # 如果导入失败，使用简单的回退函数
+    def get_dashscope_api_key():
+        return os.getenv("DASHSCOPE_API_KEY")
+
 
 class ChatDashScopeOpenAI(ChatOpenAI):
     """
@@ -28,7 +36,8 @@ class ChatDashScopeOpenAI(ChatOpenAI):
         
         # 设置 DashScope OpenAI 兼容接口的默认配置
         kwargs.setdefault("base_url", "https://dashscope.aliyuncs.com/compatible-mode/v1")
-        kwargs.setdefault("api_key", os.getenv("DASHSCOPE_API_KEY"))
+        # 优先使用 secrets_helper 获取 API 密钥（支持 Streamlit Secrets）
+        kwargs.setdefault("api_key", get_dashscope_api_key())
         kwargs.setdefault("model", "qwen-turbo")
         kwargs.setdefault("temperature", 0.1)
         kwargs.setdefault("max_tokens", 2000)
@@ -36,8 +45,9 @@ class ChatDashScopeOpenAI(ChatOpenAI):
         # 检查 API 密钥
         if not kwargs.get("api_key"):
             raise ValueError(
-                "DashScope API key not found. Please set DASHSCOPE_API_KEY environment variable "
-                "or pass api_key parameter."
+                "DASHSCOPE_API_KEY 环境变量未设置。\n"
+                "请在 Streamlit Cloud 的 Secrets 中配置，或在 .env 文件中设置 DASHSCOPE_API_KEY。\n"
+                "如果您想使用 OpenAI，请在侧边栏选择 'OpenAI' 作为模型提供商。"
             )
         
         # 调用父类初始化
