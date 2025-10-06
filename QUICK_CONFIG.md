@@ -11,6 +11,9 @@
 # OpenAI API 密钥
 OPENAI_API_KEY = "sk-你的真实OpenAI密钥"
 
+# OpenAI API 地址（可选，使用代理或第三方服务时需要）
+OPENAI_API_BASE = "https://api.openai.com/v1"
+
 [data_sources]
 # AKShare 完全免费，无需配置！
 # 已内置支持，无需任何 token
@@ -26,6 +29,7 @@ OPENAI_API_KEY = "sk-你的真实OpenAI密钥"
 - 🔗 访问: https://platform.openai.com/
 - 📧 使用邮箱注册
 - ⚠️ 需要绑定信用卡（国内双币卡或虚拟卡）
+- 🌍 国内用户可能需要科学上网
 
 ### 2. 创建 API 密钥
 1. 登录后，点击右上角头像
@@ -40,8 +44,9 @@ OPENAI_API_KEY = "sk-你的真实OpenAI密钥"
 2. 点击 **Settings** → **Secrets**
 3. 粘贴上面的配置模板
 4. 将 `"sk-你的真实OpenAI密钥"` 替换为刚才复制的密钥
-5. 点击 **Save**
-6. 重启应用
+5. **（可选）** 如果使用代理或第三方服务，修改 `OPENAI_API_BASE`
+6. 点击 **Save**
+7. 重启应用
 
 ---
 
@@ -81,9 +86,23 @@ OPENAI_API_KEY = "sk-你的真实OpenAI密钥"
 
 ## 🔄 其他 LLM 选项
 
-如果不想用 OpenAI，也可以选择：
+### OpenAI 兼容服务（使用代理）
 
-### 阿里云通义千问
+如果使用第三方 OpenAI 代理服务：
+
+```toml
+[llm]
+OPENAI_API_KEY = "sk-你的API密钥"
+OPENAI_API_BASE = "https://your-proxy-url.com/v1"  # 替换为代理地址
+```
+
+**常见代理服务**：
+- 🔗 OpenAI-SB: https://openai-sb.com/
+- 🔗 API2D: https://api2d.com/
+- 🔗 CloseAI: https://console.closeai-asia.com/
+- ⚠️ 注意：使用代理时需要替换 `OPENAI_API_BASE` 为代理提供的 URL
+
+### 阿里云通义千问（国内推荐）
 ```toml
 [llm]
 DASHSCOPE_API_KEY = "sk-你的dashscope密钥"
@@ -91,15 +110,18 @@ DASHSCOPE_API_KEY = "sk-你的dashscope密钥"
 - 🔗 https://dashscope.aliyun.com/
 - 🇨🇳 中文友好，国内访问快
 - 💰 新用户有免费额度
+- ✅ 无需科学上网
 
-### DeepSeek
+### DeepSeek（性价比之王）
 ```toml
 [llm]
 DEEPSEEK_API_KEY = "sk-你的deepseek密钥"
+DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 ```
 - 🔗 https://platform.deepseek.com/
 - 💎 性价比极高
 - 💰 价格比 OpenAI 便宜 10 倍
+- 🇨🇳 国产大模型
 
 ---
 
@@ -109,7 +131,10 @@ DEEPSEEK_API_KEY = "sk-你的deepseek密钥"
 A: 可以使用阿里云通义千问或 DeepSeek，支持支付宝付款。
 
 **Q: OpenAI 在国内能用吗？**
-A: 需要科学上网，或使用国内的 LLM 服务商。
+A: 
+- 方案 1：使用科学上网直接访问 OpenAI
+- 方案 2：使用 OpenAI 代理服务（配置 `OPENAI_API_BASE`）
+- 方案 3：使用国内 LLM（阿里云、DeepSeek 等）
 
 **Q: 免费额度用完了怎么办？**
 A: OpenAI 需要充值继续使用，或切换到其他免费额度更多的服务商。

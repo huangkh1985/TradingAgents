@@ -46,11 +46,16 @@ git push origin main
 [llm]
 # OpenAI（全球广泛使用）
 OPENAI_API_KEY = "sk-your-actual-openai-key"
+OPENAI_API_BASE = "https://api.openai.com/v1"  # 可选，默认值
 
 [data_sources]
 # AKShare（完全免费，无需 token）
 # 无需配置，开箱即用！
 ```
+
+**说明**：
+- `OPENAI_API_KEY`：必填，OpenAI 的 API 密钥
+- `OPENAI_API_BASE`：可选，使用代理服务时需要修改为代理提供的 URL
 
 #### 完整配置（所有功能）
 
@@ -81,6 +86,11 @@ OPENAI_API_KEY = "sk-your-actual-openai-key"
   3. 进入 API Keys 页面
   4. 点击 "Create new secret key"
   5. 复制密钥到 Secrets（只显示一次，请妥善保存）
+
+**国内用户提示**：
+- ⚠️ 需要科学上网才能访问 OpenAI 官网
+- 🔄 或使用 OpenAI 代理服务（需配置 `OPENAI_API_BASE`）
+- 🇨🇳 或直接使用国内 LLM（阿里云、DeepSeek）
 
 #### 2. 阿里云通义千问（中文友好）
 - 🔗 注册地址: https://dashscope.aliyun.com/
