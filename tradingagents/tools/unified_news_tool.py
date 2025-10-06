@@ -108,7 +108,8 @@ class UnifiedNewsAnalyzer:
                 logger.info(f"[统一新闻工具] 📊 东方财富返回内容长度: {len(result) if result else 0} 字符")
                 logger.info(f"[统一新闻工具] 📋 东方财富返回内容预览 (前500字符): {result[:500] if result else 'None'}")
                 
-                if result and len(result.strip()) > 100:
+                # 🔧 修复：统一使用50字符阈值
+                if result and len(result.strip()) > 50:  # 从100降至50
                     logger.info(f"[统一新闻工具] ✅ 东方财富新闻获取成功: {len(result)} 字符")
                     return self._format_news_result(result, "东方财富实时新闻", model_info)
                 else:
@@ -231,7 +232,8 @@ class UnifiedNewsAnalyzer:
                 logger.info(f"[统一新闻工具] 尝试实时港股新闻...")
                 # 使用LangChain工具的正确调用方式：.invoke()方法和字典参数
                 result = self.toolkit.get_realtime_stock_news.invoke({"ticker": stock_code, "curr_date": curr_date})
-                if result and len(result.strip()) > 100:
+                # 🔧 修复：统一使用50字符阈值
+                if result and len(result.strip()) > 50:  # 从100降至50
                     logger.info(f"[统一新闻工具] ✅ 实时港股新闻获取成功: {len(result)} 字符")
                     return self._format_news_result(result, "实时港股新闻", model_info)
         except Exception as e:

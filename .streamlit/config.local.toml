@@ -1,0 +1,40 @@
+# 本地开发配置
+# 此文件用于本地开发，不会被提交到 Git
+
+[server]
+# 服务器配置
+port = 8501
+address = "localhost"
+headless = false
+enableCORS = false
+enableXsrfProtection = false
+fileWatcherType = "auto"
+runOnSave = true
+
+[browser]
+# 浏览器配置
+gatherUsageStats = false
+serverAddress = "localhost"
+serverPort = 8501
+
+[logger]
+# 日志配置
+level = "info"
+
+[global]
+# 全局配置
+developmentMode = true
+
+[client]
+# 客户端配置
+showErrorDetails = true
+toolbarMode = "auto"
+
+[theme]
+# 主题配置
+base = "light"
+primaryColor = "#1f77b4"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f0f2f6"
+textColor = "#262730"
+

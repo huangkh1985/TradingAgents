@@ -429,16 +429,33 @@ def render_detailed_analysis(state):
     # 过滤出有数据的模块
     available_modules = []
     for module in analysis_modules:
-        if module['key'] in state and state[module['key']]:
+        # 🔧 修复：检查键是否存在，不过滤空字符串（允许显示"暂无数据"提示）
+        if module['key'] in state:
+            value = state[module['key']]
             # 检查字典类型的数据是否有实际内容
-            if isinstance(state[module['key']], dict):
+            if isinstance(value, dict):
                 # 对于字典，检查是否有非空的值
-                has_content = any(v for v in state[module['key']].values() if v)
+                has_content = any(v for v in value.values() if v)
                 if has_content:
                     available_modules.append(module)
             else:
-                # 对于字符串或其他类型，直接添加
+                # 对于字符串或其他类型，始终添加（即使为空也显示，以便给出提示）
                 available_modules.append(module)
+                # 如果内容为空，添加友好提示
+                if not value or (isinstance(value, str) and len(value.strip()) == 0):
+                    state[module['key']] = f"""
+⚠️ **{module['title']}** 数据暂时无法获取
+
+可能原因：
+- 新闻数据源暂时不可用
+- API 配额已用完或未配置
+- 网络连接问题
+
+建议：
+1. 检查 API 配置（在侧边栏的"🔧 新闻调试工具"中测试）
+2. 稍后重试分析
+3. 查看日志了解详细错误信息
+"""
 
     if not available_modules:
         # 显示占位符而不是演示数据
