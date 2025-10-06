@@ -214,7 +214,7 @@ def render_sidebar():
                 from tradingagents.utils.secrets_helper import get_dashscope_api_key
                 dashscope_key = get_dashscope_api_key()
             except ImportError:
-                import os
+                # 使用已在模块顶部导入的 os
                 dashscope_key = os.getenv('DASHSCOPE_API_KEY')
             
             if not dashscope_key:

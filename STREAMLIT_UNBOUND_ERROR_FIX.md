@@ -82,9 +82,55 @@ if not dashscope_key:
 
 ## 修改文件
 
-- `web/components/sidebar.py` - 第 225 行
+- `web/components/sidebar.py` - 第 225 行（第一次修复）
+- `web/components/sidebar.py` - 第 217 行（第二次修复）
+
+## 第二次修复 - os 模块作用域冲突
+
+### 问题描述
+
+修复 `save_model_selection` 后，又出现了类似的错误：
+
+```
+NameError: cannot access free variable 'os' where it is not associated with a value in enclosing scope
+```
+
+### 根本原因
+
+同样的作用域冲突问题：
+- 第 6 行已在模块顶部导入 `import os`
+- 第 217 行在 except 块中又有 `import os`
+- 导致 `os` 被标记为局部变量
+- 当 ImportError 不发生时，局部变量未初始化
+- `get_api_key` 函数中使用 `os.getenv()` 时抛出 NameError
+
+### 解决方案
+
+删除第 217 行的 `import os`，直接使用模块顶部已导入的 `os`：
+
+```python
+# 修改前
+except ImportError:
+    import os  # ❌ 重复导入
+    dashscope_key = os.getenv('DASHSCOPE_API_KEY')
+
+# 修改后
+except ImportError:
+    # 使用已在模块顶部导入的 os  # ✅ 使用模块级别导入
+    dashscope_key = os.getenv('DASHSCOPE_API_KEY')
+```
+
+## 经验教训
+
+**关键问题**：函数内部的条件导入会创建局部作用域，导致已在模块顶部导入的变量在函数中无法访问。
+
+**解决原则**：
+1. ✅ 所有标准库和常用模块应在文件顶部导入
+2. ❌ 不要在函数内部重复导入已在模块顶部导入的内容
+3. ❌ 避免在条件块（if/try/except）中导入常用模块
+4. ✅ 条件导入应仅用于可选依赖或特殊情况
 
 ---
 **修复日期**: 2025-10-06
-**状态**: ✅ 已完成
+**状态**: ✅ 已完成（两次修复）
 
