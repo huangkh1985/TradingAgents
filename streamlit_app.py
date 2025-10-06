@@ -1,32 +1,85 @@
 #!/usr/bin/env python3
 """
-Streamlit Cloud 部署入口文件
-此文件是 Streamlit Cloud 默认查找的入口点
-
-使用方法：
-- 本地测试: streamlit run streamlit_app.py
-- Streamlit Cloud: 自动使用此文件作为入口
+Streamlit Cloud 部署入口文件 - 极简测试版本
+逐步排查问题
 """
 
+import streamlit as st
 import sys
-import os
 from pathlib import Path
 
-# 确保项目根目录和 web 目录都在 Python 路径中
-project_root = Path(__file__).parent.absolute()
-web_dir = project_root / "web"
+# 设置页面配置
+st.set_page_config(
+    page_title="TradingAgents-CN 测试",
+    page_icon="📈",
+    layout="wide"
+)
 
-# 添加到 Python 路径（必须在导入前完成）
-sys.path.insert(0, str(project_root))
-sys.path.insert(0, str(web_dir))
+# 显示欢迎信息
+st.title("🎉 TradingAgents-CN 应用")
+st.success("✅ 应用已成功启动！")
 
-# 切换到项目根目录
-os.chdir(project_root)
+st.markdown("---")
 
-# 直接导入 web.app 模块，让 Streamlit 执行它
-# 这种方式与 Streamlit Cloud 兼容
-import importlib.util
-spec = importlib.util.spec_from_file_location("app", web_dir / "app.py")
-app_module = importlib.util.module_from_spec(spec)
-sys.modules["app"] = app_module
-spec.loader.exec_module(app_module)
+# 显示基本信息
+st.header("📊 系统信息")
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.metric("Python 版本", f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
+
+with col2:
+    st.metric("Streamlit", st.__version__)
+
+with col3:
+    project_root = Path(__file__).parent.absolute()
+    st.metric("项目根目录", "已找到")
+
+st.markdown("---")
+
+# 测试状态
+st.header("🔍 部署测试")
+
+with st.expander("✅ 第一步：基础启动测试", expanded=True):
+    st.success("应用成功启动并显示此页面")
+    st.info("说明：Streamlit Cloud 环境配置正确")
+
+with st.expander("📝 下一步测试计划"):
+    st.markdown("""
+    **逐步测试项目：**
+    
+    1. ✅ 基础 Streamlit 应用（当前）
+    2. ⏳ 添加项目路径和导入测试
+    3. ⏳ 测试日志系统
+    4. ⏳ 测试认证系统
+    5. ⏳ 测试完整 Web 应用
+    
+    **如果看到此页面，说明：**
+    - Streamlit Cloud 部署成功
+    - Python 环境正常
+    - 包依赖安装正确
+    """)
+
+st.markdown("---")
+
+# 登录测试区域
+st.header("🔐 快速登录测试")
+
+st.info("""
+**默认测试账号：**
+- 管理员：`admin` / `admin123`
+- 普通用户：`user` / `user123`
+
+等待完整功能恢复后可用。
+""")
+
+# 显示调试信息
+with st.expander("🛠️ 调试信息"):
+    st.code(f"""
+项目根目录: {Path(__file__).parent.absolute()}
+工作目录: {Path.cwd()}
+Python 路径: {sys.path[:3]}
+    """)
+
+st.markdown("---")
+st.caption("TradingAgents-CN v1.0 | 部署测试版本")
