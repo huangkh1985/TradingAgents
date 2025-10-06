@@ -328,7 +328,7 @@ def render_sidebar():
             save_model_selection(st.session_state.llm_provider, st.session_state.model_category, llm_model)
 
         elif llm_provider == "deepseek":
-            deepseek_options = ["deepseek-chat"]
+            deepseek_options = ["deepseek-chat", "deepseek-reasoner"]
 
             # 获取当前选择的索引
             current_index = 0
@@ -340,7 +340,8 @@ def render_sidebar():
                 options=deepseek_options,
                 index=current_index,
                 format_func=lambda x: {
-                    "deepseek-chat": "DeepSeek Chat - 通用对话模型，适合股票分析"
+                    "deepseek-chat": "DeepSeek Chat - 💬 通用对话模型，适合股票分析",
+                    "deepseek-reasoner": "DeepSeek Reasoner - 🧠 推理模型，深度思考分析"
                 }[x],
                 help="选择用于分析的DeepSeek模型",
                 key="deepseek_model_select"
