@@ -1251,7 +1251,18 @@ def render_sidebar():
             if st.button("⚙️ 系统设置", key="system_settings_btn", use_container_width=True):
                 st.session_state.page = "system_settings"
         
+        # 新闻调试工具
+        st.markdown("---")
+        st.markdown("**🔧 新闻调试工具**")
+        
+        try:
+            from web.utils.news_quick_test import show_news_debug
+            show_news_debug()
+        except Exception as e:
+            logger.error(f"加载新闻调试工具失败: {e}")
+        
         # 帮助链接
+        st.markdown("---")
         st.markdown("**📚 帮助资源**")
         
         st.markdown("""
