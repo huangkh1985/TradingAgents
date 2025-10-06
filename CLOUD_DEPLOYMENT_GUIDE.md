@@ -44,12 +44,12 @@ git push origin main
 
 ```toml
 [llm]
-# 选择一个 LLM 提供商（推荐阿里云）
-DASHSCOPE_API_KEY = "sk-your-actual-dashscope-key"
+# OpenAI（全球广泛使用）
+OPENAI_API_KEY = "sk-your-actual-openai-key"
 
 [data_sources]
-# A股数据源（可选，有免费额度）
-TUSHARE_TOKEN = "your-tushare-token"
+# AKShare（完全免费，无需 token）
+# 无需配置，开箱即用！
 ```
 
 #### 完整配置（所有功能）
@@ -71,49 +71,62 @@ TUSHARE_TOKEN = "your-tushare-token"
 
 ### LLM 服务商（至少选一个）
 
-#### 1. 阿里云通义千问（推荐，中文友好）
+#### 1. OpenAI（推荐，功能强大）⭐
+- 🔗 注册地址: https://platform.openai.com/
+- 💰 费用: 按使用量计费，新用户有免费额度
+- 🌍 特点: 全球广泛使用，稳定可靠
+- 📝 获取步骤:
+  1. 注册 OpenAI 账号
+  2. 添加付款方式（需要信用卡）
+  3. 进入 API Keys 页面
+  4. 点击 "Create new secret key"
+  5. 复制密钥到 Secrets（只显示一次，请妥善保存）
+
+#### 2. 阿里云通义千问（中文友好）
 - 🔗 注册地址: https://dashscope.aliyun.com/
 - 💰 费用: 新用户有免费额度
+- 🇨🇳 特点: 中文优化，国内访问快
 - 📝 获取步骤:
   1. 注册阿里云账号
   2. 开通 DashScope 服务
   3. 创建 API Key
   4. 复制密钥到 Secrets
 
-#### 2. OpenAI（功能强大）
-- 🔗 注册地址: https://platform.openai.com/
-- 💰 费用: 需要付费，按使用量计费
-- 📝 获取步骤:
-  1. 注册 OpenAI 账号
-  2. 添加付款方式
-  3. 创建 API Key
-  4. 复制密钥到 Secrets
-
 #### 3. DeepSeek（性价比高）
 - 🔗 注册地址: https://platform.deepseek.com/
-- 💰 费用: 价格较低，性能不错
+- 💰 费用: 价格低，性能好
+- 💎 特点: 国产 LLM，性价比极高
 - 📝 获取步骤:
   1. 注册 DeepSeek 账号
   2. 创建 API Key
   3. 复制密钥到 Secrets
 
-### 数据源（可选）
+### 数据源
 
-#### Tushare（A股数据，推荐）
+#### AKShare（完全免费，推荐）⭐
+- 🔗 官网: https://www.akshare.xyz/
+- 💰 费用: **完全免费，无需注册！**
+- 📊 支持: A股、港股、美股、期货、基金等
+- ✨ 特点: 开箱即用，无需任何配置
+- 📝 使用: 直接使用，无需 API Key
+
+#### Tushare（A股数据，需注册）
 - 🔗 注册地址: https://tushare.pro/
 - 💰 费用: 免费用户有积分限制
+- 📊 支持: 专业 A股数据
 - 📝 获取步骤:
   1. 注册 Tushare 账号
   2. 获取 Token
-  3. 复制到 Secrets
+  3. 复制到 Secrets（可选）
 
 #### Finnhub（美股数据）
 - 🔗 注册地址: https://finnhub.io/
 - 💰 费用: 有免费 tier
+- 📊 支持: 美股、外汇、加密货币
 - 📝 获取步骤:
   1. 注册账号
   2. 获取 API Key
-  3. 复制到 Secrets
+  3. 复制到 Secrets（可选）
 
 ---
 
