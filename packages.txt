@@ -1,4 +1,0 @@
-# System-level dependencies for Streamlit Cloud deployment
-# Leave empty if no system packages are needed
-# Only add system binary dependencies here, not Python packages
-
