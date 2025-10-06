@@ -135,9 +135,19 @@ class TradingAgentsGraph:
         elif self.config["llm_provider"].lower() == "google":
             # 使用 Google OpenAI 兼容适配器，解决工具调用格式不匹配问题
             logger.info(f"🔧 使用Google AI OpenAI 兼容适配器 (解决工具调用问题)")
-            google_api_key = os.getenv('GOOGLE_API_KEY')
+            
+            # 支持从 Streamlit Secrets 读取 GOOGLE_API_KEY
+            try:
+                from tradingagents.utils.secrets_helper import get_google_api_key
+                google_api_key = get_google_api_key() or os.getenv('GOOGLE_API_KEY')
+            except ImportError:
+                google_api_key = os.getenv('GOOGLE_API_KEY')
+            
             if not google_api_key:
-                raise ValueError("使用Google AI需要设置GOOGLE_API_KEY环境变量")
+                raise ValueError(
+                    "GOOGLE_API_KEY 环境变量未设置。\n"
+                    "请在 Streamlit Cloud 的 Secrets 中配置，或在 .env 文件中设置。"
+                )
             
             self.deep_thinking_llm = ChatGoogleOpenAI(
                 model=self.config["deep_think_llm"],
@@ -150,7 +160,6 @@ class TradingAgentsGraph:
                 google_api_key=google_api_key,
                 temperature=0.1,
                 max_tokens=2000,
-                client_options=client_options,
                 transport="rest"
             )
             
