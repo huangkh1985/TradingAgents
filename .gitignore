@@ -115,6 +115,7 @@ COMMIT_SUMMARY.md
 # Streamlit缓存和敏感配置
 .streamlit/cache/
 .streamlit/secrets.toml  # 包含 API 密钥，不要上传
+.streamlit/config.local.toml  # 本地开发配置，不要上传
 *.cache
 # 临时文件
 *.tmp
